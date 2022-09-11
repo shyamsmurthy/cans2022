@@ -1,0 +1,1119 @@
+# Sagemath code for Algorithm 2
+#
+
+import time
+from math import isnan
+
+
+def get_ed(A,B, d_x, d_y):
+	ed = ((A - d_x) ** 2 + (B - d_y)**2) ** 0.5
+	return ed
+
+def check_ed(A,B, d_x, d_y, threshold, dbg):
+	ed = ((A - d_x) ** 2 + (B - d_y)**2) ** 0.5
+	if ed > threshold:
+		if dbg:
+			print "value greater than threshold"
+		return False
+	if dbg:
+		print "ed less than threshold", ed, threshold, A, B, d_x, d_y
+	return True
+
+
+def compute_circle_intersection(c0, r0, c1, r1):
+# source : paulbourke.net/geometry/circlesphere
+#
+
+        res = ((-1, -1),(-1,-1))
+	res_z = ((c0[0], c0[1]), (c0[0], c0[1]))
+        d = ((c0[0] - c1[0]) ** 2 + (c0[1] - c1[1]) ** 2) ** 0.5
+
+	if r1 == 0:
+		if abs(d - r0) < 1e-8 :
+			return res_z
+		else:
+			return res
+
+	if r0 == 0:
+		if abs(d - r1) < 1e-8:
+			return res_z
+		else:
+			return res
+
+
+        if d > (r0 + r1) :
+#               print "First condition d > r1 + r2 fails"
+                return res
+        else :
+                rdist = abs(r0 - r1)
+                if d < rdist:
+#                       print "Second condition d < |r1 - r2| fails"
+                        return res
+
+        dx = c1[0] - c0[0]
+        dy = c1[1] - c0[1]
+        a = (r0 ** 2 - r1 ** 2 + d**2) / (2 * d)
+        if (r0**2 - a**2) < 0:
+                print "h will be NEGATIVE"
+        h = (r0 **2 - a**2) ** 0.5
+
+        x2 = c0[0] + (a/d)*dx
+        y2 = c0[1] + (a/d)*dy
+        rx = -dy * (h/d)
+        ry = dx * (h/d)
+
+        res = ((x2+rx, y2+ry),(x2-rx, y2-ry))
+
+        return res
+
+
+
+
+def r(p):
+        # this function returns a real random number between -p and p
+
+        rr = random()
+        sign = randint(-1,1)
+	while sign == 0:
+		sign = randint(-1,1)
+        if sign < 0:
+                sign = -1
+        else:
+                sign = 1
+        return sign * rr * p
+
+
+
+def get_drivxy(driv_x, driv_y, perturb):
+
+	if perturb == 0:
+		return driv_x, driv_y
+
+	d_x = driv_x + r(perturb)
+	d_y = driv_y + r(perturb)
+
+	while check_ed(driv_x, driv_y, d_x, d_y, perturb, 0) != True:
+		d_x = driv_x + r(perturb)
+		d_y = driv_y + r(perturb)
+
+	return d_x, d_y
+
+
+
+def check_in_bound(pt):
+	xval = pt[0]
+	yval = pt[1]
+
+	if xval > xLB and xval < xUB and yval > yLB and yval < yUB:
+		return True
+	return False
+
+
+
+def check_if_point_already_added(int_point1, int_points_12, threshold):
+
+	for i in range(len(int_points_12)):
+		mdist = get_ed(int_point1[0], int_point1[1], int_points_12[i][0], int_points_12[i][1])
+		if mdist <= threshold:
+			return true
+	return false
+
+
+def check_perturbation_circle_intersection(int_point1, dist_per_adv, r_perturb):
+
+	for k in range(len(dist_per_adv)):
+		c3 = dist_per_adv[k][2]
+		r3 = dist_per_adv[k][0]
+		pt1, pt2 = compute_circle_intersection(int_point1, r_perturb, c3, r3)
+
+		if pt1[0] != -1:
+			return true
+	return false
+
+
+def run_main():
+
+	driv_orig_xy = []
+
+	for i in range(0, num_drivers):
+		driv_x = randint(xLB, xUB) 
+		driv_y = randint(yLB, yUB)
+		driv_orig_xy.append((driv_x, driv_y))
+
+
+	A = AB_x
+	B = AB_y
+
+	X_adv_1 = xUB
+	Y_adv_1 = yUB
+
+	X_adv_1_prime = 0
+	Y_adv_1_prime = yUB
+	
+	X_adv_2 = xLB
+	Y_adv_2 = yUB
+
+	X_adv_2_prime = xLB
+	Y_adv_2_prime = 0
+
+	X_adv_3 = xLB
+	Y_adv_3 = yLB
+
+	X_adv_3_prime = 0
+	Y_adv_3_prime = yLB
+
+	X_adv_4 = xUB
+	Y_adv_4 = yLB
+
+	X_adv_4_prime = xUB
+	Y_adv_4_prime = 0
+
+	X_adv_5 = RR(xUB/2)
+	Y_adv_5 = yUB
+
+	X_adv_7 = RR(xLB/2)
+	Y_adv_7 = yLB
+
+	X_adv_5_prime = xUB
+	Y_adv_5_prime = RR(yUB/2)
+
+	X_adv_7_prime = xLB
+	Y_adv_7_prime = RR(yLB/2)
+
+	X_adv_A = xLB
+	Y_adv_A = RR(yUB/2)
+
+	X_adv_B = xUB
+	Y_adv_B = RR(yLB/2)
+
+	X_adv_C = RR(xLB/2)
+	Y_adv_C = yUB
+
+	X_adv_D = RR(xUB/2)
+	Y_adv_D = yLB
+
+
+	# Each adversary gets distances per driver
+	dist_per_adversary = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(A, B, d_x, d_y)
+		dist_per_adversary.append((dist, (d_x, d_y), (A, B)))
+
+	dist_per_adversary_1 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_1, Y_adv_1, d_x, d_y)
+		dist_per_adversary_1.append((dist, (d_x, d_y), (X_adv_1, Y_adv_1)))
+		
+	dist_per_adversary_1_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_1_prime, Y_adv_1_prime, d_x, d_y)
+		dist_per_adversary_1_prime.append((dist, (d_x, d_y), (X_adv_1_prime, Y_adv_1_prime)))
+
+
+	dist_per_adversary_2 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_2, Y_adv_2, d_x, d_y)
+		dist_per_adversary_2.append((dist, (d_x, d_y), (X_adv_2, Y_adv_2)))
+
+	dist_per_adversary_2_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_2_prime, Y_adv_2_prime, d_x, d_y)
+		dist_per_adversary_2_prime.append((dist, (d_x, d_y), (X_adv_2_prime, Y_adv_2_prime)))
+
+
+
+	dist_per_adversary_3 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_3, Y_adv_3, d_x, d_y)
+		dist_per_adversary_3.append((dist, (d_x, d_y), (X_adv_3, Y_adv_3)))
+
+	dist_per_adversary_3_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_3_prime, Y_adv_3_prime, d_x, d_y)
+		dist_per_adversary_3_prime.append((dist, (d_x, d_y), (X_adv_3_prime, Y_adv_3_prime)))
+
+
+	dist_per_adversary_4 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_4, Y_adv_4, d_x, d_y)
+		dist_per_adversary_4.append((dist, (d_x, d_y), (X_adv_4, Y_adv_4)))
+
+	dist_per_adversary_4_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_4_prime, Y_adv_4_prime, d_x, d_y)
+		dist_per_adversary_4_prime.append((dist, (d_x, d_y), (X_adv_4_prime, Y_adv_4_prime)))
+
+	dist_per_adversary_5 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_5, Y_adv_5, d_x, d_y)
+		dist_per_adversary_5.append((dist, (d_x, d_y), (X_adv_5, Y_adv_5)))
+
+	dist_per_adversary_7 = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_7, Y_adv_7, d_x, d_y)
+		dist_per_adversary_7.append((dist, (d_x, d_y), (X_adv_7, Y_adv_7)))
+
+	dist_per_adversary_5_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_5_prime, Y_adv_5_prime, d_x, d_y)
+		dist_per_adversary_5_prime.append((dist, (d_x, d_y), (X_adv_5_prime, Y_adv_5_prime)))
+
+	dist_per_adversary_7_prime = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_7_prime, Y_adv_7_prime, d_x, d_y)
+		dist_per_adversary_7_prime.append((dist, (d_x, d_y), (X_adv_7_prime, Y_adv_7_prime)))
+
+	dist_per_adversary_A = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_A, Y_adv_A, d_x, d_y)
+		dist_per_adversary_A.append((dist, (d_x, d_y), (X_adv_A, Y_adv_A)))
+
+
+	dist_per_adversary_B = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_B, Y_adv_B, d_x, d_y)
+		dist_per_adversary_B.append((dist, (d_x, d_y), (X_adv_B, Y_adv_B)))
+
+	dist_per_adversary_C = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_C, Y_adv_C, d_x, d_y)
+		dist_per_adversary_C.append((dist, (d_x, d_y), (X_adv_C, Y_adv_C)))
+
+	dist_per_adversary_D = []
+	for i in range(num_drivers):
+		d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+		dist = get_ed(X_adv_D, Y_adv_D, d_x, d_y)
+		dist_per_adversary_D.append((dist, (d_x, d_y), (X_adv_D, Y_adv_D)))
+
+
+	c0 = r0 = 0
+
+
+
+
+
+	int_points_12 = []
+	int_points_12_4 = []
+	int_points_12_4_4p = []
+	int_points_12_4_4p_2p = []
+	int_points_12_4_4p_2p_1p = []
+	int_points_12_4_4p_2p_1p_3p = []
+	int_points_12_4_4p_2p_1p_3p_5 = []
+	int_points_12_4_4p_2p_1p_3p_5_7 = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C = []
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D = []
+	int_points_34 = []
+	int_points_34_2 = []
+	int_points_34_2_2p = []
+	int_points_34_2_2p_4p = []
+	int_points_34_2_2p_4p_1p = []
+	int_points_34_2_2p_4p_1p_3p = []
+	int_points_34_2_2p_4p_1p_3p_5 = []
+	int_points_34_2_2p_4p_1p_3p_5_7 = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C = []
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D = []
+
+
+
+	time_start = time.time()
+
+	print "Computing intersection of circles 1,2"
+	for i in range(len(dist_per_adversary_1)):
+		c0 = dist_per_adversary_1[i][2]
+		r0 = dist_per_adversary_1[i][0]
+
+		for j in range(len(dist_per_adversary_2)):
+			c1 = dist_per_adversary_2[j][2]
+			r1 = dist_per_adversary_2[j][0]
+			pt1, pt2 = compute_circle_intersection(c0, r0, c1, r1)
+			if pt1[0] == -1:
+				continue
+
+
+			int_point1 = pt1
+			int_point2 = pt2
+
+
+			r_perturb = pThreshold
+			for k in range(len(dist_per_adversary_3)):
+				c3 = dist_per_adversary_3[k][2]
+				r3 = dist_per_adversary_3[k][0]
+				pt1, pt2 = compute_circle_intersection(int_point1, r_perturb, c3, r3)
+
+				if pt1[0] != -1:
+					if check_if_point_already_added(int_point1, int_points_12, perturb) == false:
+						int_points_12.append((int_point1))
+
+
+				### THE SECOND POINT
+				pt1, pt2 = compute_circle_intersection(int_point2, r_perturb, c3, r3)
+
+				if pt1[0] != -1:
+					if check_if_point_already_added(int_point2, int_points_12, perturb) == false:
+						int_points_12.append((int_point2))
+
+
+	int_points_12 = Set(int_points_12)
+
+	int_points_12_4 = []
+	for i in range(len(int_points_12)):
+		int_point = int_points_12[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_4)):
+			c4 = dist_per_adversary_4[j][2]
+			r4 = dist_per_adversary_4[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4.append((int_point))
+
+	int_points_12_4 = Set(int_points_12_4)
+
+
+	int_points_12_4_4p = []
+	for i in range(len(int_points_12_4)):
+		int_point = int_points_12_4[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_4_prime)):
+			c4 = dist_per_adversary_4_prime[j][2]
+			r4 = dist_per_adversary_4_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p.append((int_point))
+
+	int_points_12_4_4p = Set(int_points_12_4_4p)
+
+
+	int_points_12_4_4p_2p = []
+	for i in range(len(int_points_12_4_4p)):
+		int_point = int_points_12_4_4p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_2_prime)):
+			c4 = dist_per_adversary_2_prime[j][2]
+			r4 = dist_per_adversary_2_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p.append((int_point))
+
+	int_points_12_4_4p_2p = Set(int_points_12_4_4p_2p)
+
+
+	int_points_12_4_4p_2p_1p = []
+	for i in range(len(int_points_12_4_4p_2p)):
+		int_point = int_points_12_4_4p_2p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_1_prime)):
+			c4 = dist_per_adversary_1_prime[j][2]
+			r4 = dist_per_adversary_1_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p_1p.append((int_point))
+
+	int_points_12_4_4p_2p_1p = Set(int_points_12_4_4p_2p_1p)
+
+
+	int_points_12_4_4p_2p_1p_3p = []
+	for i in range(len(int_points_12_4_4p_2p_1p)):
+		int_point = int_points_12_4_4p_2p_1p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_3_prime)):
+			c4 = dist_per_adversary_3_prime[j][2]
+			r4 = dist_per_adversary_3_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p_1p_3p.append((int_point))
+
+	int_points_12_4_4p_2p_1p_3p = Set(int_points_12_4_4p_2p_1p_3p)
+
+
+	int_points_12_4_4p_2p_1p_3p_5 = []
+	for i in range(len(int_points_12_4_4p_2p_1p_3p)):
+		int_point = int_points_12_4_4p_2p_1p_3p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_5)):
+			c4 = dist_per_adversary_5[j][2]
+			r4 = dist_per_adversary_5[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p_1p_3p_5.append((int_point))
+
+	int_points_12_4_4p_2p_1p_3p_5 = Set(int_points_12_4_4p_2p_1p_3p_5)
+
+
+	int_points_12_4_4p_2p_1p_3p_5_7 = []
+	for i in range(len(int_points_12_4_4p_2p_1p_3p_5)):
+		int_point = int_points_12_4_4p_2p_1p_3p_5[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_7)):
+			c4 = dist_per_adversary_7[j][2]
+			r4 = dist_per_adversary_7[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p_1p_3p_5_7.append((int_point))
+
+	int_points_12_4_4p_2p_1p_3p_5_7 = Set(int_points_12_4_4p_2p_1p_3p_5_7)
+
+
+	int_points_12_4_4p_2p_1p_3p_5_7_5p = []
+	for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7)):
+		int_point = int_points_12_4_4p_2p_1p_3p_5_7[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_5_prime)):
+			c4 = dist_per_adversary_5_prime[j][2]
+			r4 = dist_per_adversary_5_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_12_4_4p_2p_1p_3p_5_7_5p.append((int_point))
+
+	int_points_12_4_4p_2p_1p_3p_5_7_5p = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p)
+
+
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = []
+	for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p)):
+		int_point = int_points_12_4_4p_2p_1p_3p_5_7_5p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_7_prime)):
+			c4 = dist_per_adversary_7_prime[j][2]
+			r4 = dist_per_adversary_7_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				if adversary_count == 16:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p.append((int_point))
+				else:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p.append((int_point, -1))
+
+	int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p)
+	
+
+	# default adversary count = 12
+
+	if adversary_count == 4:
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_12_4)):
+			int_points_12_4_4p_2p_1p_3p_5_7_5p_7p.append((int_points_12_4[mm], -1))
+	elif adversary_count == 8:
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_12_4_4p_2p_1p_3p)):
+			int_points_12_4_4p_2p_1p_3p_5_7_5p_7p.append((int_points_12_4_4p_2p_1p_3p[mm], -1)) 
+
+
+	if adversary_count == 16:
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A = []
+		for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p)):
+			int_point = int_points_12_4_4p_2p_1p_3p_5_7_5p_7p[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_A)):
+				c4 = dist_per_adversary_A[j][2]
+				r4 = dist_per_adversary_A[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A.append((int_point))
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A)
+
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B = []
+		for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A)):
+			int_point = int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_B)):
+				c4 = dist_per_adversary_B[j][2]
+				r4 = dist_per_adversary_B[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B.append((int_point))
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B)
+
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C = []
+		for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B)):
+			int_point = int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_C)):
+				c4 = dist_per_adversary_C[j][2]
+				r4 = dist_per_adversary_C[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C.append((int_point))
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C)
+
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D = []
+		for i in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C)):
+			int_point = int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_D)):
+				c4 = dist_per_adversary_D[j][2]
+				r4 = dist_per_adversary_D[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D.append((int_point))
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D = Set(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D)
+
+
+		int_points_12_4_4p_2p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D)):
+			int_points_12_4_4p_2p_1p_3p_5_7_5p_7p.append((int_points_12_4_4p_2p_1p_3p_5_7_5p_7p_A_B_C_D[mm], -1))
+
+
+
+
+
+	int_points_34 = []
+
+	print "Computing intersection of circles 3,4"
+	for i in range(len(dist_per_adversary_3)):
+		c0 = dist_per_adversary_3[i][2]
+		r0 = dist_per_adversary_3[i][0]
+
+		for j in range(len(dist_per_adversary_4)):
+			c1 = dist_per_adversary_4[j][2]
+			r1 = dist_per_adversary_4[j][0]
+			pt1, pt2 = compute_circle_intersection(c0, r0, c1, r1)
+			if pt1[0] == -1:
+				continue
+
+
+			int_point1 = pt1
+			int_point2 = pt2
+
+
+			r_perturb = pThreshold
+			for k in range(len(dist_per_adversary_1)):
+				c3 = dist_per_adversary_1[k][2]
+				r3 = dist_per_adversary_1[k][0]
+				pt1, pt2 = compute_circle_intersection(int_point1, r_perturb, c3, r3)
+				if pt1[0] != -1:
+					if check_if_point_already_added(int_point1, int_points_34, perturb) == false:
+						int_points_34.append((int_point1))
+
+				### THE SECOND POINT
+				pt1, pt2 = compute_circle_intersection(int_point2, r_perturb, c3, r3)
+
+				if pt1[0] != -1:
+					if check_if_point_already_added(int_point2, int_points_34, perturb) == false:
+						int_points_34.append((int_point2))
+
+	int_points_34 = Set(int_points_34)
+
+
+	int_points_34_2 = []
+
+	for i in range(len(int_points_34)):
+		int_point = int_points_34[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_2)):
+			c4 = dist_per_adversary_2[j][2]
+			r4 = dist_per_adversary_2[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2.append((int_point))
+
+	int_points_34_2 = Set(int_points_34_2)
+
+
+	int_points_34_2_2p = []
+
+	for i in range(len(int_points_34_2)):
+		int_point = int_points_34_2[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_2_prime)):
+			c4 = dist_per_adversary_2_prime[j][2]
+			r4 = dist_per_adversary_2_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p.append((int_point))
+
+	int_points_34_2_2p = Set(int_points_34_2_2p)
+
+
+	int_points_34_2_2p_4p = []
+
+	for i in range(len(int_points_34_2_2p)):
+		int_point = int_points_34_2_2p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_4_prime)):
+			c4 = dist_per_adversary_4_prime[j][2]
+			r4 = dist_per_adversary_4_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p.append((int_point))
+
+	int_points_34_2_2p_4p = Set(int_points_34_2_2p_4p)
+
+
+	int_points_34_2_2p_4p_1p = []
+
+	for i in range(len(int_points_34_2_2p_4p)):
+		int_point = int_points_34_2_2p_4p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_1_prime)):
+			c4 = dist_per_adversary_1_prime[j][2]
+			r4 = dist_per_adversary_1_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p_1p.append((int_point))
+
+	int_points_34_2_2p_4p_1p = Set(int_points_34_2_2p_4p_1p)
+
+
+	int_points_34_2_2p_4p_1p_3p = []
+
+	for i in range(len(int_points_34_2_2p_4p_1p)):
+		int_point = int_points_34_2_2p_4p_1p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_3_prime)):
+			c4 = dist_per_adversary_3_prime[j][2]
+			r4 = dist_per_adversary_3_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p_1p_3p.append((int_point))
+
+	int_points_34_2_2p_4p_1p_3p = Set(int_points_34_2_2p_4p_1p_3p)
+
+
+	int_points_34_2_2p_4p_1p_3p_5 = []
+
+	for i in range(len(int_points_34_2_2p_4p_1p_3p)):
+		int_point = int_points_34_2_2p_4p_1p_3p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_5)):
+			c4 = dist_per_adversary_5[j][2]
+			r4 = dist_per_adversary_5[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p_1p_3p_5.append((int_point))
+
+	int_points_34_2_2p_4p_1p_3p_5 = Set(int_points_34_2_2p_4p_1p_3p_5)
+
+
+	int_points_34_2_2p_4p_1p_3p_5_7 = []
+
+	for i in range(len(int_points_34_2_2p_4p_1p_3p_5)):
+		int_point = int_points_34_2_2p_4p_1p_3p_5[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_7)):
+			c4 = dist_per_adversary_7[j][2]
+			r4 = dist_per_adversary_7[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p_1p_3p_5_7.append((int_point))
+
+	int_points_34_2_2p_4p_1p_3p_5_7 = Set(int_points_34_2_2p_4p_1p_3p_5_7)
+
+
+	int_points_34_2_2p_4p_1p_3p_5_7_5p = []
+
+	for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7)):
+		int_point = int_points_34_2_2p_4p_1p_3p_5_7[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_5_prime)):
+			c4 = dist_per_adversary_5_prime[j][2]
+			r4 = dist_per_adversary_5_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				int_points_34_2_2p_4p_1p_3p_5_7_5p.append((int_point))
+
+	int_points_34_2_2p_4p_1p_3p_5_7_5p = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p)
+
+
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = []
+
+	for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p)):
+		int_point = int_points_34_2_2p_4p_1p_3p_5_7_5p[i]
+		r_perturb = pThreshold_two
+		for j in range(len(dist_per_adversary_7_prime)):
+			c4 = dist_per_adversary_7_prime[j][2]
+			r4 = dist_per_adversary_7_prime[j][0]
+			pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+			if pt3[0] != -1:
+				if adversary_count == 16:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p.append((int_point))
+				else:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p.append((int_point, -1))
+
+	int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p)
+
+
+	# default adversary count = 12
+
+	if adversary_count == 4:
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_34_2)):
+			int_points_34_2_2p_4p_1p_3p_5_7_5p_7p.append((int_points_34_2[mm], -1))
+	elif adversary_count == 8:
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_34_2_2p_4p_1p_3p)):
+			int_points_34_2_2p_4p_1p_3p_5_7_5p_7p.append((int_points_34_2_2p_4p_1p_3p[mm], -1))
+
+
+	if adversary_count == 16:
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A = []
+		for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p)):
+			int_point = int_points_34_2_2p_4p_1p_3p_5_7_5p_7p[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_A)):
+				c4 = dist_per_adversary_A[j][2]
+				r4 = dist_per_adversary_A[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A.append((int_point))
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A)
+
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B = []
+		for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A)):
+			int_point = int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_B)):
+				c4 = dist_per_adversary_B[j][2]
+				r4 = dist_per_adversary_B[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B.append((int_point))
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B)
+
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C = []
+		for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B)):
+			int_point = int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_C)):
+				c4 = dist_per_adversary_C[j][2]
+				r4 = dist_per_adversary_C[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C.append((int_point))
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C)
+
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D = []
+		for i in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C)):
+			int_point = int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C[i]
+			r_perturb = pThreshold_two
+			for j in range(len(dist_per_adversary_D)):
+				c4 = dist_per_adversary_D[j][2]
+				r4 = dist_per_adversary_D[j][0]
+				pt3, pt4 = compute_circle_intersection(int_point, r_perturb, c4, r4)
+				if pt3[0] != -1:
+					int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D.append((int_point))
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D = Set(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D)
+
+		int_points_34_2_2p_4p_1p_3p_5_7_5p_7p = []
+		for mm in range(len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D)):
+			int_points_34_2_2p_4p_1p_3p_5_7_5p_7p.append((int_points_34_2_2p_4p_1p_3p_5_7_5p_7p_A_B_C_D[mm], -1))
+
+
+
+
+	print "Done intersections.", "Lens:", len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p), len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p)
+
+
+	Set_12_4set_uniq = []
+	set_12_4set_index = -1
+	l_set_12 = list(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p)
+	for i in range(len(l_set_12)-1):
+		if l_set_12[i][1] == -1:
+			Set_12_4set_uniq.append([])
+			set_12_4set_index += 1
+			Set_12_4set_uniq[set_12_4set_index].append(l_set_12[i][0])
+			x0 = l_set_12[i][0]
+			l_set_12[i] = (x0, set_12_4set_index)
+
+		for j in range(i, len(l_set_12)):
+
+			if abs(l_set_12[i][0][0] - l_set_12[j][0][0]) < 1e-8:
+				x0 = l_set_12[j][0]
+				l_set_12[j] = (x0, l_set_12[i][1])
+				continue
+
+			ddist = get_ed(l_set_12[i][0][0], l_set_12[i][0][1], l_set_12[j][0][0], l_set_12[j][0][1])
+			if ddist <= 2*perturb:
+				Set_12_4set_uniq[l_set_12[i][1]].append(l_set_12[j][0])
+				x0 = l_set_12[j][0]
+				l_set_12[j] = (x0, l_set_12[i][1])
+				continue
+
+			
+			idx = l_set_12[i][1]
+			for k in range(len(Set_12_4set_uniq[idx])):
+				ddist = get_ed(Set_12_4set_uniq[idx][k][0], Set_12_4set_uniq[idx][k][1], l_set_12[j][0][0], l_set_12[j][0][1])
+				if ddist <= 2*perturb:
+					Set_12_4set_uniq[l_set_12[i][1]].append(l_set_12[j][0])
+					x0 = l_set_12[j][0]
+					l_set_12[j] = (x0, l_set_12[i][1])
+					break
+
+	## Check if last element needs to be added
+	if l_set_12[len(l_set_12)-1][1] == -1:
+		Set_12_4set_uniq.append([])
+		set_12_4set_index += 1
+		Set_12_4set_uniq[set_12_4set_index].append(l_set_12[len(l_set_12)-1][0])
+		x0 = l_set_12[len(l_set_12)-1][0]
+		l_set_12[len(l_set_12)-1] = (x0, set_12_4set_index)
+
+
+	print "Len Set_12_4set_uniq:", len(Set_12_4set_uniq), "from:", len(l_set_12)
+
+
+	Set_34_2set_uniq = []
+	set_34_2set_index = -1
+	l_set_34 = list(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p)
+	for i in range(len(l_set_34)-1):
+		if l_set_34[i][1] == -1:
+			Set_34_2set_uniq.append([])
+			set_34_2set_index += 1
+			Set_34_2set_uniq[set_34_2set_index].append(l_set_34[i][0])
+			x0 = l_set_34[i][0]
+			l_set_34[i] = (x0, set_34_2set_index)
+
+		for j in range(i, len(l_set_34)):
+
+			if abs(l_set_34[i][0][0] - l_set_34[j][0][0]) < 1e-8:
+				x0 = l_set_34[j][0]
+				l_set_34[j] = (x0, l_set_34[i][1])
+				continue
+
+			ddist = get_ed(l_set_34[i][0][0], l_set_34[i][0][1], l_set_34[j][0][0], l_set_34[j][0][1])
+			if ddist <= 2*perturb:
+				Set_34_2set_uniq[l_set_34[i][1]].append(l_set_34[j][0])
+				x0 = l_set_34[j][0]
+				l_set_34[j] = (x0, l_set_34[i][1])
+				continue
+
+
+			idx = l_set_34[i][1]
+			for k in range(len(Set_34_2set_uniq[idx])):
+				ddist = get_ed(Set_34_2set_uniq[idx][k][0], Set_34_2set_uniq[idx][k][1], l_set_34[j][0][0], l_set_34[j][0][1])
+				if ddist <= 2*perturb:
+					Set_34_2set_uniq[l_set_34[i][1]].append(l_set_34[j][0])
+					x0 = l_set_34[j][0]
+					l_set_34[j] = (x0, l_set_34[i][1])
+					break
+			
+
+	print "Set_34_2set_uniq:", len(Set_34_2set_uniq), "from:", len(l_set_34)
+
+
+	
+	final_found_match = []
+	for i in range(len(Set_12_4set_uniq)):
+		add_flag = 0
+		for i_dash in range(len(Set_12_4set_uniq[i])):
+			if add_flag == 1:
+				break
+			for j in range(len(Set_34_2set_uniq)):
+				if add_flag == 1:
+					break
+				for j_dash in range(len(Set_34_2set_uniq[j])):
+					ddist = get_ed(Set_12_4set_uniq[i][i_dash][0], Set_12_4set_uniq[i][i_dash][1], Set_34_2set_uniq[j][j_dash][0], Set_34_2set_uniq[j][j_dash][1])
+
+					if perturb == 0:
+						if add_flag == 0:
+							final_found_match.append(Set_12_4set_uniq[i][0])
+							add_flag = 1
+						continue
+
+
+					if ddist <= filterThr:
+						if add_flag == 0:
+							final_found_match.append(Set_12_4set_uniq[i][0])
+							add_flag = 1
+
+			
+
+	print "final found match result:", len(final_found_match)
+	for i in range(len(final_found_match)):
+		if debug_print:
+			print final_found_match[i]
+	
+
+
+
+	set_match_points = final_found_match
+
+
+	match_count = 0
+	result_match = []
+	for i in range(len(driv_orig_xy)):
+		result_match.append([])
+		result_match[i].append((driv_orig_xy[i]))
+		for j in range(len(set_match_points)):
+			edval = get_ed(driv_orig_xy[i][0], driv_orig_xy[i][1], set_match_points[j][0], set_match_points[j][1])
+
+			if perturb == 0:
+				if edval <= 1e-6:
+					result_match[i].append((set_match_points[j]))
+					match_count += 1
+			elif edval <= (1.0 *perturb):
+				result_match[i].append((set_match_points[j]))
+				match_count += 1
+
+
+	driver_match = 0
+	for i in range(len(result_match)):
+		if (len(result_match[i])) > 1:
+			driver_match += 1
+			
+	print "Matching with driver orig loc:"
+	for i in range(len(result_match)):
+		if debug_print:
+			print result_match[i]
+
+	time_end = time.time()
+	
+	print "Obtained final result:", len(final_found_match)
+	print "Verification:: matching driver with location:", match_count, "out of", len(set_match_points), RR(match_count * 100 /len(set_match_points)), "%"
+	print "Matched ", driver_match, "out of", len(driv_orig_xy), " for perturb:", perturb, "Percentage:", RR((driver_match * 100)/len(driv_orig_xy))
+
+	result_match_count = match_count
+
+	non_match = []
+	for i in range(len(set_match_points)):
+		non_match.append([])
+		non_match[i].append((set_match_points[i]))
+		for j in range(len(driv_orig_xy)):
+			edval = get_ed(driv_orig_xy[j][0], driv_orig_xy[j][1], set_match_points[i][0], set_match_points[i][1])
+
+			if perturb == 0:
+				if edval <= 1e-8:
+					non_match[i].append((driv_orig_xy[j]))
+					match_count += 1
+			elif edval <= (1.0 *perturb):
+				non_match[i].append((driv_orig_xy[j]))
+				match_count += 1
+
+	print "Matching results with driver loc:", len(non_match)
+	for i in range(len(non_match)):
+		if debug_print:
+			print non_match[i]
+
+	print " "
+	print "Statistics: [time taken: ", time_end-time_start, "seconds]"
+	print "int_points_12:", len(int_points_12)
+	print "int_points_12_4:", len(int_points_12_4)
+	print "int_points_12_4_4p:", len(int_points_12_4_4p)
+	print "int_points_12_4_4p_2p:", len(int_points_12_4_4p_2p)
+	print "int_points_12_4_4p_2p_1p:",  len(int_points_12_4_4p_2p_1p)
+	print "int_points_12_4_4p_2p_1p_3p:",  len(int_points_12_4_4p_2p_1p_3p)
+	print "int_points_12_4_4p_2p_1p_3p_5:",  len(int_points_12_4_4p_2p_1p_3p_5)
+	print "int_points_12_4_4p_2p_1p_3p_5_7:",  len(int_points_12_4_4p_2p_1p_3p_5_7)
+	print "int_points_12_4_4p_2p_1p_3p_5_7_5p:",  len(int_points_12_4_4p_2p_1p_3p_5_7_5p)
+	print "int_points_12_4_4p_2p_1p_3p_5_7_5p_7p:",  len(int_points_12_4_4p_2p_1p_3p_5_7_5p_7p)
+	print " "
+	print "int_points_34:", len(int_points_34)
+	print "int_points_34_2:", len(int_points_34_2)
+	print "int_points_34_2_2p:", len(int_points_34_2_2p)
+	print "int_points_34_2_2p_4p:", len(int_points_34_2_2p_4p)
+	print "int_points_34_2_2p_4p_1p:", len(int_points_34_2_2p_4p_1p)
+	print "int_points_34_2_2p_4p_1p_3p:", len(int_points_34_2_2p_4p_1p_3p)
+	print "int_points_34_2_2p_4p_1p_3p_5:", len(int_points_34_2_2p_4p_1p_3p_5)
+	print "int_points_34_2_2p_4p_1p_3p_5_7:", len(int_points_34_2_2p_4p_1p_3p_5_7)
+	print "int_points_34_2_2p_4p_1p_3p_5_7_5p:", len(int_points_34_2_2p_4p_1p_3p_5_7_5p)
+	print "int_points_34_2_2p_4p_1p_3p_5_7_5p_7p:", len(int_points_34_2_2p_4p_1p_3p_5_7_5p_7p)
+
+
+	return len(final_found_match), result_match_count
+
+##
+##
+########	show(( point((pt1), size=10, rgbcolor='green') + point((pt2), size=10, rgbcolor='green') + point((driv_orig_xy[0]), size=30, rgbcolor='blue') + point((res_list[0]), size=30, rgbcolor='orange') + circle((c0), r0, edgecolor='blue') + circle((c1), r1, edgecolor='green') + circle((c2), r2, edgecolor='orange')  + circle((pt1), 2*perturb, edgecolor='red') + circle((pt2), 2*perturb, edgecolor='blue')  ))
+##
+
+#### end function
+
+
+
+# For 4 sqkm
+# xLB = -1000
+# xUB = 1000
+# yLB = -1000
+# yUB = 1000
+
+
+# For 25 sqkm
+# xLB = -3000
+# xUB = 2000
+# yLB = -3000
+# yUB = 2000
+
+# For 100 sqkm
+xLB = -5000
+xUB = 5000
+yLB = -5000
+yUB = 5000
+
+# For 400 sqkm
+# xLB = -10000
+# xUB = 10000
+# yLB = -10000
+# yUB = 10000
+
+
+debug_print = 0
+perturb = 50 # 50, 75, 100, 125, 150
+num_drivers = 50 # 25, 50, 75, 100
+
+pThreshold     = 2.00 * perturb
+pThreshold_two = 2.00 * perturb
+filterThr      = 1.70 * perturb
+
+AB_x = (xLB + xUB)/2 #origin
+AB_y = (yLB + yUB)/2 #origin
+
+repeat_count = 20
+
+adversary_count = 12 # default number of adversaries
+
+result_array = []
+print "Starting:", "adversary_count:", adversary_count
+for i in range(repeat_count):
+	print "Run ID:", i
+	final_count, match_count = run_main()
+	numerator = match_count
+	denominator = max(final_count, num_drivers)
+	percent_found = RR((numerator * 100)/denominator)
+	result_array.append((numerator, final_count, num_drivers, percent_found))
+
+cc = 0
+for i in range(len(result_array)):
+	cc = cc + result_array[i][3]
+cc = RR(cc/len(result_array))
+
+print " "
+print result_array
+print " "
+print "repeat, perturb, num_drivers, result, pTh, fTh " 
+print repeat_count, perturb, num_drivers, cc.str(digits=5), "%  ", pThreshold, filterThr
+
+

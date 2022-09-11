@@ -1,0 +1,342 @@
+# Sagemath code for Algorithm 1
+#
+import time
+from math import isnan
+ 
+ 
+def get_ed(A,B, d_x, d_y):
+        ed = ((A - d_x) ** 2 + (B - d_y)**2) ** 0.5
+        return ed
+ 
+def check_ed(A,B, d_x, d_y, threshold, dbg):
+        ed = ((A - d_x) ** 2 + (B - d_y)**2) ** 0.5
+        if ed > threshold:
+                if dbg:
+                        print "value greater than threshold"
+                return False
+        if dbg:
+                print "ed less than threshold", ed, threshold, A, B, d_x, d_y
+        return True
+ 
+ 
+def compute_circle_intersection(c0, r0, c1, r1):
+# source : paulbourke.net/geometry/circlesphere
+#
+ 
+        res = ((-1, -1),(-1,-1))
+        res_z = ((c0[0], c0[1]), (c0[0], c0[1]))
+        d = ((c0[0] - c1[0]) ** 2 + (c0[1] - c1[1]) ** 2) ** 0.5
+ 
+        if r1 == 0:
+                if abs(d - r0) < 1e-8 :
+                        return res_z
+                else:
+                        return res
+ 
+        if r0 == 0:
+                if abs(d - r1) < 1e-8:
+                        return res_z
+                else:
+                        return res
+ 
+ 
+        if d > (r0 + r1) :
+#               print "First condition d > r1 + r2 fails"
+                return res
+        else :
+                rdist = abs(r0 - r1)
+                if d < rdist:
+#                       print "Second condition d < |r1 - r2| fails"
+                        return res
+ 
+        dx = c1[0] - c0[0]
+        dy = c1[1] - c0[1]
+        a = (r0 ** 2 - r1 ** 2 + d**2) / (2 * d)
+        if (r0**2 - a**2) < 0:
+                print "h will be NEGATIVE"
+        h = (r0 **2 - a**2) ** 0.5
+ 
+        x2 = c0[0] + (a/d)*dx
+        y2 = c0[1] + (a/d)*dy
+        rx = -dy * (h/d)
+        ry = dx * (h/d)
+ 
+        res = ((x2+rx, y2+ry),(x2-rx, y2-ry))
+ 
+        return res
+ 
+ 
+def check_point_on_circle(c, r, px, py):
+        dist = get_ed(c[0], c[1], px, py)
+        if abs(dist - r) < 1e-8 :
+                return true
+ 
+        return false
+ 
+ 
+ 
+def r(p):
+        # this function returns a real random number between -p and p
+ 
+        rr = random()
+        sign = randint(-1,1)
+        while sign == 0:
+                sign = randint(-1,1)
+        if sign < 0:
+                sign = -1
+        else:
+                sign = 1
+        return sign * rr * p
+ 
+ 
+ 
+def get_drivxy(driv_x, driv_y, perturb):
+ 
+        if perturb == 0:
+                return driv_x, driv_y
+ 
+        d_x = driv_x + r(perturb)
+        d_y = driv_y + r(perturb)
+ 
+        while check_ed(driv_x, driv_y, d_x, d_y, perturb, 0) != True:
+                d_x = driv_x + r(perturb)
+                d_y = driv_y + r(perturb)
+ 
+        return d_x, d_y
+ 
+ 
+ 
+ 
+def check_if_point_already_added(int_point1, int_points_12, threshold):
+ 
+        for i in range(len(int_points_12)):
+                mdist = get_ed(int_point1[0], int_point1[1], int_points_12[i][0], int_points_12[i][1])
+                if mdist <= threshold:
+                        return true
+        return false
+ 
+ 
+def check_perturbation_circle_intersection(int_point1, dist_per_adv, perturb):
+ 
+        for k in range(len(dist_per_adv)):
+                c3 = dist_per_adv[k][2]
+                r3 = dist_per_adv[k][0]
+                pt1, pt2 = compute_circle_intersection(int_point1, perturb, c3, r3)
+ 
+                if pt1[0] != -1:
+                        return true
+        return false
+ 
+ 
+ 
+def verify_obtained_locations(driv_orig_xy, int_points, num_drivers):
+        count = 0
+        for i in range(len(driv_orig_xy)):
+                for j in range(len(int_points)):
+                        edval = get_ed(driv_orig_xy[i][0], driv_orig_xy[i][1], int_points[j][0], int_points[j][1])
+                        if edval <= 1e-6:
+                                count += 1
+ 
+ 
+        if count == num_drivers:
+                print "Successfully verified total count:", count
+        else:
+                print "Error: Expected:", num_drivers, "Obtained:", count
+                print int_points
+                print "Error: Expected:", num_drivers, "Obtained:", count
+ 
+        return false
+ 
+ 
+def permute_list(lst):
+        idx = []
+        set_idx = Set(idx)
+        while (len(set_idx) != len(lst)):
+                i = randint(0, len(lst)-1)
+                if i == len(lst):
+                        continue
+                idx.append(i)
+                set_idx = Set(idx)
+                while (len(idx) != len(set_idx)):
+                        idx.remove(i)
+                        i = randint(0, len(lst)-1)
+                        if i == len(lst):
+                                continue
+                        idx.append(i)
+                        set_idx = Set(idx)
+ 
+        tmplist = []
+        for i in range(len(lst)):
+                tmplist.append(lst[i])
+        for i in range(len(lst)):
+                lst[i] = tmplist[idx[i]]
+        return
+ 
+ 
+def run_main():
+ 
+        driv_orig_xy = []
+ 
+        for i in range(0, num_drivers):
+                driv_x = randint(xLB, xUB)
+                driv_y = randint(yLB, yUB)
+                driv_orig_xy.append((driv_x, driv_y))
+ 
+ 
+ 
+        X_adv_1 = xUB
+        Y_adv_1 = yUB
+ 
+        X_adv_2 = xLB
+        Y_adv_2 = yUB
+ 
+        X_adv_3 = xLB
+        Y_adv_3 = yLB
+ 
+        X_adv_4 = xUB
+        Y_adv_4 = yLB
+ 
+ 
+        # Each adversary gets distances per driver
+ 
+        dist_per_adversary_1 = []
+        for i in range(num_drivers):
+                d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+                dist = get_ed(X_adv_1, Y_adv_1, d_x, d_y)
+                dist_per_adversary_1.append((dist, (d_x, d_y), (X_adv_1, Y_adv_1)))
+ 
+ 
+        dist_per_adversary_2 = []
+        for i in range(num_drivers):
+                d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+                dist = get_ed(X_adv_2, Y_adv_2, d_x, d_y)
+                dist_per_adversary_2.append((dist, (d_x, d_y), (X_adv_2, Y_adv_2)))
+ 
+ 
+        dist_per_adversary_3 = []
+        for i in range(num_drivers):
+                d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+                dist = get_ed(X_adv_3, Y_adv_3, d_x, d_y)
+                dist_per_adversary_3.append((dist, (d_x, d_y), (X_adv_3, Y_adv_3)))
+ 
+ 
+        dist_per_adversary_4 = []
+        for i in range(num_drivers):
+                d_x, d_y = get_drivxy(driv_orig_xy[i][0], driv_orig_xy[i][1], perturb)
+                dist = get_ed(X_adv_4, Y_adv_4, d_x, d_y)
+                dist_per_adversary_4.append((dist, (d_x, d_y), (X_adv_4, Y_adv_4)))
+ 
+        permute_list(dist_per_adversary_1)
+        permute_list(dist_per_adversary_2)
+        permute_list(dist_per_adversary_3)
+        permute_list(dist_per_adversary_4)
+ 
+        c0 = r0 = 0
+ 
+ 
+        int_points_12 = []
+ 
+        time_start = time.time()
+ 
+        print "Computing intersection of circles 1,2"
+        for i in range(len(dist_per_adversary_1)):
+                c0 = dist_per_adversary_1[i][2]
+                r0 = dist_per_adversary_1[i][0]
+ 
+                for j in range(len(dist_per_adversary_2)):
+                        c1 = dist_per_adversary_2[j][2]
+                        r1 = dist_per_adversary_2[j][0]
+                        pt1, pt2 = compute_circle_intersection(c0, r0, c1, r1)
+                        if pt1[0] == -1:
+                                continue
+ 
+ 
+                        int_point1 = pt1
+                        int_point2 = pt2
+ 
+ 
+                        for k in range(len(dist_per_adversary_3)):
+                                c3 = dist_per_adversary_3[k][2]
+                                r3 = dist_per_adversary_3[k][0]
+                                flg = check_point_on_circle(c3, r3, int_point1[0], int_point1[1])
+ 
+ 
+                                if flg:
+                                        if check_if_point_already_added(int_point1, int_points_12, perturb) == false:
+                                                int_points_12.append((int_point1))
+ 
+ 
+                                ### THE SECOND POINT
+                                flg = check_point_on_circle(c3, r3, int_point2[0], int_point2[1])
+ 
+                                if flg:
+                                        if check_if_point_already_added(int_point2, int_points_12, perturb) == false:
+                                                int_points_12.append((int_point2))
+ 
+ 
+        int_points_12 = Set(int_points_12)
+ 
+        int_points_12_4 = []
+        for i in range(len(int_points_12)):
+                int_point = int_points_12[i]
+                for j in range(len(dist_per_adversary_4)):
+                        c4 = dist_per_adversary_4[j][2]
+                        r4 = dist_per_adversary_4[j][0]
+                        flg = check_point_on_circle(c4, r4, int_point[0], int_point[1])
+ 
+                        if flg:
+                                int_points_12_4.append((int_point))
+ 
+        int_points_12_4 = Set(int_points_12_4)
+ 
+ 
+        verify_obtained_locations(driv_orig_xy, int_points_12_4, num_drivers)
+ 
+        return int_points_12_4
+ 
+ 
+#### end function
+ 
+ 
+# For 4 sqkm
+# xLB = -1000
+# xUB = 1000
+# yLB = -1000
+# yUB = 1000
+ 
+ 
+# For 25 sqkm
+xLB = -3000
+xUB = 2000
+yLB = -3000
+yUB = 2000
+ 
+# For 100 sqkm
+# xLB = -5000
+# xUB = 5000
+# yLB = -5000
+# yUB = 5000
+ 
+# For 400 sqkm
+# xLB = -10000
+# xUB = 10000
+# yLB = -10000
+# yUB = 10000
+ 
+## Set perturb to 0
+perturb = 0
+num_drivers = 100
+ 
+AB_x = (xLB + xUB)/2 #origin
+AB_y = (yLB + yUB)/2 #origin
+ 
+repeat_count = 1
+ 
+st = time.time()
+print "Starting:"
+for i in range(repeat_count):
+        print "Run ID:", i
+        zero_p_list = run_main()
+et = time.time()
+print "Time taken:", et - st
+
